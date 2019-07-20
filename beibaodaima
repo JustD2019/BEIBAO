@@ -1,0 +1,78 @@
+#include<stdio.h>
+int c[100];    //设置背包容量
+int w[101][101];    //设置物品属性
+double v[102];    //设置每个物品的价值
+double tw[103];        //当前背包重量
+double tv=0;        //当前背包价值
+double bestprice=0;     //目前最大价值
+
+//num 物品个数 grp组数  
+void getprice(int num,int grp,int j)
+{
+	int i,flag;   //flag 为标志
+    if(j>=num) //递归结束的判定条件
+    {
+		//得出最优解
+        if(tv>bestprice){
+        	bestprice=tv;
+		}
+        return;
+    }
+ 
+    flag=0;    //初始化标志
+    for(i=0;i<grp;i++){
+		//判断 现在背包重量+相应的物品重量 是否大于 背包的约束容量 ，如果大于则将标志设为1，不进行选择，跳出循环
+		if(tw[i]+w[i][j]>c[i]){  
+    		flag=1;
+    		break;         
+		}
+	}
+	if(!flag){   //如果标志为0 则执行
+		for(i=0;i<grp;i++)
+        	tw[i]+=w[i][j];   //循环计算grp行 j+1列装入背包的现在的容量
+
+		//计算目前总价值
+        tv+=v[j];
+
+		//继续执行下一个数
+        getprice(num,grp,j+1);
+
+        //return 回来执行回溯，减去相应物品重量价值，取消对该物品的选择
+        for(i=0;i<grp;i++)
+        	tw[i]-=w[i][j];
+        tv-=v[j];
+	}
+    //标志为1不选择后继续执行
+    getprice(num,grp,j+1);   //函数执行到末尾返回之前的数进行回溯
+}
+
+int main()
+{
+	//定义输入的num每组物品个数和grp组数和循坏输入条件
+	int num,grp;
+	int i;
+	int j;
+	//输入物品等信息
+	printf("请输入每组物品个数n和组数m: ");
+	scanf("%d %d",&num,&grp);
+
+	printf("请依次输入n个物品价值: ");                    
+		for(i=0;i<num;i++)
+			scanf("%lf",&v[i]);
+	
+	for(i=0;i<grp;i++){
+		printf("请输入第%d组的属性: ",i+1);
+		for(j=0;j<num;j++)
+			scanf("%d",&w[i][j]);
+	}
+
+	printf("请依次输入m个组的约束条件: ");
+		for(i=0;i<grp;i++)
+			scanf("%d",&c[i]);
+
+	//调用函数选最优价值
+	getprice(num,grp,0);
+    //输出最优价值
+    printf("最大价值为%.3lf\n",bestprice);
+    return 0;
+}
